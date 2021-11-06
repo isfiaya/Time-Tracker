@@ -1,5 +1,7 @@
 # Time Tracker App
 
+[hosted online on Netlify](https://time-tracker-tekab.netlify.app/)
+
 ## NOTES:
 
 - An application that calculates the elapsed time and display the total laps .
@@ -13,7 +15,7 @@
 - Use Sass for styling
 - Responsive Layout
 
-### Getting Started
+### Getting Started localy
 
 1. Clone this repo by using git clone command.
 2. Run npm install to install all the dependencies of the project

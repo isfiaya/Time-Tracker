@@ -2,6 +2,9 @@
   <header>
     <h2>Today,{{showCurrentDate + ' ' + showCurrentMonth}}</h2>
     <div class="header_btns">
+      <button class="header_btn_stop" @click="$emit('removeLaps')">
+        <i class="uil uil-square-shape"></i>Remove all
+      </button>
       <button class="header_btn_stop" @click="$emit('stop')">
         <i class="uil uil-square-shape"></i>Stop
       </button>
@@ -54,6 +57,7 @@ header {
     background-color: white;
     border-radius: 0.25rem;
     font-size: 0.75rem;
+    cursor: pointer;
     i {
       margin-right: 0.25rem;
       font-size: 1rem;
@@ -61,6 +65,9 @@ header {
   }
   button:active {
     transform: scale(0.9);
+  }
+  button:hover {
+    background-color: #f0eaea;
   }
   p {
     color: #60b669;
@@ -79,7 +86,7 @@ header {
     color: #089308;
   }
 }
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   header {
     flex-direction: row;
     justify-content: space-between;

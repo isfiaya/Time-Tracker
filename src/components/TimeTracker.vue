@@ -6,6 +6,7 @@
       :laps="laps"
       @start="start"
       @stop="stop"
+      @removeLaps="removeLaps"
     />
     <main>
       <section class="current_period" v-if="showCurrentPeriod">
@@ -22,9 +23,9 @@
         v-for="(lap,index) in laps.slice().reverse()"
         :key="index"
         :lapId="lap.id"
-        :lapDateStart="lap.dateStart"
-        :lapDateEnd="lap.dateEnd"
-        :lapFormattedTime="lap.formattedTime"
+        :lapDateStart="lap.DateStart"
+        :lapDateEnd="lap.DateEnd"
+        :lapFormattedTime="lap.FormattedTime"
       />
     </main>
     <Footer :totalTime="totalTime" />
@@ -33,6 +34,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import axios from "axios";
 import Header from "@/components/Header.vue";
 import Period from "@/components/Period.vue";
 import Footer from "@/components/Footer.vue";
@@ -62,10 +64,12 @@ export default defineComponent({
   methods: {
     start() {
       if (this.timerState !== "running") {
+        // tICK FUNCTION UPDATE currentTimer EACH 1 SECOND
         this.tick();
         this.timerState = "running";
         const d = new Date();
         this.dateStart = d.toLocaleTimeString();
+        // WHEN showCurrentPeriod = True UPDATE UI TO SHOW SECTION FOR Current Period
         this.showCurrentPeriod = true;
       }
     },
@@ -75,6 +79,7 @@ export default defineComponent({
         this.formattedTime = this.formatTime(this.currentTimer);
       }, 1000);
     },
+    // RETURN  THE SECONDS ELAPSED ON THE FORMAT TIME
     formatTime(seconds: number) {
       let measuredTime = new Date(0);
       measuredTime.setSeconds(seconds);
@@ -86,15 +91,8 @@ export default defineComponent({
         window.clearInterval(this.ticker);
         const d = new Date();
         this.dateEnd = d.toLocaleTimeString();
-        this.id++;
-        this.laps.push({
-          seconds: this.currentTimer,
-          formattedTime: this.formatTime(this.currentTimer),
-          dateEnd: this.dateEnd,
-          dateStart: this.dateStart,
-          id: this.id,
-        });
-        console.log(this.laps);
+        this.id = this.laps.length + 1;
+        this.postLap();
         this.currentTimer = 0;
         this.formattedTime = "00:00:00";
         this.timerState = "stopped";
@@ -102,13 +100,51 @@ export default defineComponent({
         this.totalTimer();
       }
     },
+    // REQUEST SEND DATA TO THE SERVER
+    postLap() {
+      axios
+        .post("https://time-tracker-tekab.herokuapp.com/laps", {
+          id: this.id,
+          DateStart: this.dateStart,
+          DateEnd: this.dateEnd,
+          FormattedTime: this.formattedTime,
+          seconds: this.currentTimer,
+        })
+        .then((res) => {
+          console.log(res.data);
+        })
+        .then(() => this.getLap())
+        .catch((err) => console.log(err));
+    },
+    // REQUEST GET DATA FROM THE SERVER
+    getLap() {
+      axios
+        .get("https://time-tracker-tekab.herokuapp.com/laps")
+        .then((res) => (this.laps = res.data))
+        .then(() => console.log(this.laps))
+        .then(() => this.totalTimer());
+    },
+    // REQUEST DELETE DATA FROM THE SERVER
+    removeLaps() {
+      if (this.timerState === "stopped" && this.laps.length) {
+        axios
+          .delete("https://time-tracker-tekab.herokuapp.com/laps/delete")
+          .then((res) => console.log(res.data))
+          .then(() => (this.laps = []))
+          .then(() => this.totalTimer());
+      }
+    },
     totalTimer() {
+      // IF THERE A SERVAL LAPS RETURN TOTAL
       if (this.laps.length) {
         const total = this.laps.reduce((a: any, b: any) => ({
           seconds: a.seconds + b.seconds,
         }));
         const totalPeriodAndCurrent = total.seconds + this.currentTimer;
         this.totalTime = this.formatTime(totalPeriodAndCurrent);
+      } else {
+        // IF THERE ONE LAP RETURN CURRENT TIMER
+        this.totalTime = this.formatTime(this.currentTimer);
       }
     },
   },
@@ -116,6 +152,9 @@ export default defineComponent({
     currentTimer: function () {
       this.totalTimer();
     },
+  },
+  created() {
+    this.getLap();
   },
 });
 </script>

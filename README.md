@@ -6,14 +6,15 @@
 
 - An application that calculates the elapsed time and display the total laps .
 - each lap start when clicking start new and end when click stop .
-- all laps will store in an array so when refreshing the page will start from a new array and will lose all previous laps .
+- all laps will store in an array in the server so when refreshing the page will not lose previous laps .
 
 ### information about project
 
 - Use Vue 3 as a frontend framework
 - Use Typescript
 - Use Sass for styling
-- Responsive Layout
+- Use axios to make HTTP requests
+- Responsive Design
 
 ### Getting Started localy
 
